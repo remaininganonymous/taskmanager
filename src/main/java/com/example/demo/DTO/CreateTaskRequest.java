@@ -8,10 +8,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @AllArgsConstructor
-public class CreateTaskDto {
+public class CreateTaskRequest {
 
     @NotNull(message = "Имя обязательно для ввода")
     @Size(max = 100, message = "Заголовок задачи не должен превышать 100 символов")
@@ -26,5 +28,7 @@ public class CreateTaskDto {
 
     // TODO: валидатор (но также может быть передано и пустое значение)
     private State taskState;
+
+    private UUID taskExecutorId;
 
 }

@@ -4,11 +4,15 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @AllArgsConstructor
-public class LeaveCommentDto {
+public class LeaveCommentRequest {
+
+    @Setter
+    @NotNull(message = "Должен быть предоставлен ID комментария")
+    private UUID taskId;
 
     @Setter
     @NotNull(message = "Должен быть предоставлен текст комментария")

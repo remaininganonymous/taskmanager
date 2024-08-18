@@ -1,6 +1,7 @@
 package com.example.demo.models;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,38 +9,33 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Getter
-@NoArgsConstructor
+@Builder
 @Entity
+@Table(name = "comments")
 public class Comment {
 
+    @Getter
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private UUID id;
 
+    @Getter
     @Setter
     @Column(nullable = false)
     private String text;
 
+    @ManyToOne
+    @JoinColumn(name = "task_id", nullable = false)
+    private Task task;
+
+    @Getter
     @Setter
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "commenter_id", nullable = false)
     private User commenter;
 
-    @Column(nullable = false)
-    private LocalDateTime leftAt;
+    @Getter
+    @Column(name = "left_at", nullable = false)
+    private final LocalDateTime leftAt = LocalDateTime.now();
 
-    @Setter
-    @Column(nullable = true)
-    private LocalDateTime updatedAt;
-
-    public Comment(String text, User commenter, LocalDateTime leftAt) {
-        this.text = text;
-        if (leftAt != null) {
-            this.leftAt = leftAt;
-        } else {
-            this.leftAt = LocalDateTime.now();
-        }
-        this.commenter = commenter;
-    }
 }

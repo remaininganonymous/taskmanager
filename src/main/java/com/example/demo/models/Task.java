@@ -3,66 +3,61 @@ package com.example.demo.models;
 import com.example.demo.models.enums.Priority;
 import com.example.demo.models.enums.State;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
-@Getter
-@NoArgsConstructor
+@Builder
 @Entity
+@Table(name = "tasks")
 public class Task {
 
+    @Getter
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private UUID id;
 
+    @Getter
     @Setter
     @Column(nullable = false, length = 100)
     private String title;
 
+    @Getter
     @Setter
     @Column(nullable = false, length = 2048)
     private String description;
 
+    @Getter
     @Setter
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private State state;
 
+    @Getter
     @Setter
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Priority priority;
 
+    @Getter
     @Setter
-    @Column(nullable = false)
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
+    @Getter
     @Setter
-    @Column(nullable = true)
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "executor_id")
     private User executor;
 
-    public Task(String title, String description, State state, Priority priority, User author, User executor) {
-        this.title = title;
-        this.description = description;
-        if (state != null) {
-            this.state = state;
-        } else {
-            this.state = State.PENDING;  // по умолчанию "в ожидании"
-        }
-        if (priority != null) {
-            this.priority = priority;
-        } else {
-            this.priority = Priority.LOW; // допустим, что это тоже может быть полем по умолчанию
-        }
-        this.author = author;
-        this.executor = executor;
-    }
+    @Getter
+    @Setter
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    private List<Comment> comments;
 
 }

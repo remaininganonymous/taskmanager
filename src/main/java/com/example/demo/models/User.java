@@ -1,43 +1,55 @@
 package com.example.demo.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.*;
 
-@Getter
-@NoArgsConstructor
+@Builder
 @Entity
+@Table(name = "users")
 public class User {
 
+    @Getter
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private UUID id;
 
+    @Getter
     @Setter
     @Column(nullable = false)
     private String email;
 
-    @Setter
+    @Getter
     @Column(nullable = false)
     private String password;
 
+    @Getter
     @Setter
     @OneToMany(mappedBy = "author")
-    private List<Task> authorOf = Collections.emptyList();
+    private List<Task> authorOf;
 
+    @Getter
     @Setter
     @OneToMany(mappedBy = "executor")
-    private List<Task> executorOf = Collections.emptyList();
+    private List<Task> executorOf;
 
+    @Getter
     @Setter
     @OneToMany(mappedBy = "commenter")
-    private List<Comment> comments = Collections.emptyList();
+    private List<Comment> comments;
 
-    public User(String email, String password, List<Task> tasksUserAuthorOf, List<Task> tasksUserExecutorOf, List<Comment> comments) {
-        this.email = email;
-        this.password = password;
+    @JsonIgnore
+    public String getPassword() {
+        return password;
     }
+
+    public void setPassword(String password) {
+        this.password = new BCryptPasswordEncoder().encode(password);
+    }
+
 }
