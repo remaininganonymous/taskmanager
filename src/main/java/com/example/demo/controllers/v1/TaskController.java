@@ -15,18 +15,22 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.example.demo.error.ErrorResponseBuilder.buildErrorResponse;
+
 @RestController
 @ControllerAdvice
 @RequestMapping("/api/v1/task")
 public class TaskController {
 
+    /*
+    * Внедрение зависимостей
+    * */
     private TaskInfoService taskInfoService;
 
     @Autowired
@@ -55,10 +59,9 @@ public class TaskController {
         this.commentManagementService = commentManagementService;
     }
 
-    public ResponseEntity<?> buildErrorResponse(Exception e, HttpStatus status) {
-        return ResponseEntity.status(status)
-                .body(status.value() + status.getReasonPhrase() + ": " + e.getMessage());
-    }
+    /*
+    *  Обработка исключений
+    * */
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleException(Exception e) {
@@ -72,33 +75,32 @@ public class TaskController {
         return buildErrorResponse(e, status);
     }
 
+    @ExceptionHandler(EntityExistsException.class)
+    public ResponseEntity<?> handleEntityExistsException(EntityExistsException e) {
+        HttpStatus status = HttpStatus.CONFLICT;
+        return buildErrorResponse(e, status);
+    }
+
+    /*@ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
+    public ResponseEntity<?> handleAuthenticationCredentialsNotFoundException(AuthenticationCredentialsNotFoundException e) {
+        HttpStatus status = HttpStatus.CONFLICT;
+        return buildErrorResponse(e, status);
+    }*/
+
+    /*
+    * Маппинги
+    * */
 
     @PostMapping("/create")
     public ResponseEntity<?> createTask(@RequestBody @Valid CreateTaskRequest request) {
-        try {
-            Task task = taskManagementService.create(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new LabeledResponse("Созданная задача", task));
-        } catch (AuthenticationCredentialsNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("401 UNAUTHORIZED: " + e.getMessage());
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("404 NOT FOUND: " + e.getMessage());
-        } catch (EntityExistsException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body("409 CONFLICT: " + e.getMessage()); // а может не надо?
-        }
+        Task task = taskManagementService.create(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new LabeledResponse("Созданная задача", task));
     }
 
     @PatchMapping("/{id}/edit")
     public ResponseEntity<?> editTask(@PathVariable UUID id, @RequestBody @Valid UpdateTaskRequest request) {
-        try {
-            Task task = taskManagementService.update(request);
-            return ResponseEntity.ok(new LabeledResponse("Обновленная задача", task));
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("404 NOT FOUND: " + e.getMessage());
-        }
+        Task task = taskManagementService.update(request);
+        return ResponseEntity.ok(new LabeledResponse("Обновленная задача", task));
     }
 
     @GetMapping("/")
@@ -120,66 +122,41 @@ public class TaskController {
 
     @PostMapping("/{id}/delete")
     public ResponseEntity<?> deleteTask(@PathVariable UUID id) {
-        try {
-            taskManagementService.delete(id);
-            return ResponseEntity.ok().body("Удаление прошло успешно");
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("404 NOT FOUND: " + e.getMessage());
-        }
+        taskManagementService.delete(id);
+        return ResponseEntity.ok().body("Удаление прошло успешно");
     }
 
     @PatchMapping("/{id}/state")
     public ResponseEntity<?> changeState(@PathVariable UUID id, @RequestParam State state) {
-        try {
-            UpdateTaskRequest request = new UpdateTaskRequest();
-            request.setTaskId(id);
-            request.setTaskState(state);
-            Task updatedTask = taskManagementService.update(request);
-            return ResponseEntity.ok(new LabeledResponse("Обновленная задача", updatedTask));
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("404 NOT FOUND: " + e.getMessage());
-        }
+        UpdateTaskRequest request = new UpdateTaskRequest();
+        request.setTaskId(id);
+        request.setTaskState(state);
+        Task updatedTask = taskManagementService.update(request);
+        return ResponseEntity.ok(new LabeledResponse("Обновленная задача", updatedTask));
     }
 
     @PatchMapping("/{id}/priority")
     public ResponseEntity<?> changePriority(@PathVariable UUID id, @RequestParam Priority priority) {
-        try {
-            UpdateTaskRequest request = new UpdateTaskRequest();
-            request.setTaskId(id);
-            request.setTaskPriority(priority);
-            Task updatedTask = taskManagementService.update(request);
-            return ResponseEntity.ok(new LabeledResponse("Обновленная задача", updatedTask));
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("404 NOT FOUND: " + e.getMessage());
-        }
+        UpdateTaskRequest request = new UpdateTaskRequest();
+        request.setTaskId(id);
+        request.setTaskPriority(priority);
+        Task updatedTask = taskManagementService.update(request);
+        return ResponseEntity.ok(new LabeledResponse("Обновленная задача", updatedTask));
     }
 
     @PatchMapping("/{id}/assign")
     public ResponseEntity<?> assignExecutor(@PathVariable UUID taskId, @RequestParam UUID executorToAssignId) {
-        try {
-            UpdateTaskRequest request = new UpdateTaskRequest();
-            request.setTaskId(taskId);
-            request.setTaskExecutorId(executorToAssignId);
-            Task updatedTask = taskManagementService.update(request);
-            return ResponseEntity.ok(new LabeledResponse("Обновленная задача", updatedTask));
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("404 NOT FOUND: " + e.getMessage());
-        }
+        UpdateTaskRequest request = new UpdateTaskRequest();
+        request.setTaskId(taskId);
+        request.setTaskExecutorId(executorToAssignId);
+        Task updatedTask = taskManagementService.update(request);
+        return ResponseEntity.ok(new LabeledResponse("Обновленная задача", updatedTask));
     }
 
     @PostMapping("/{id}/comment")
     public ResponseEntity<?> commentTask(@PathVariable UUID id, @RequestBody LeaveCommentRequest request) {
-        try {
-            Comment comment = commentManagementService.create(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new LabeledResponse("Новый комментарий", comment));
-        } catch (AuthenticationCredentialsNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("401 UNAUTHORIZED: " + e.getMessage());
-        }
+        Comment comment = commentManagementService.create(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new LabeledResponse("Новый комментарий", comment));
     }
 
     @GetMapping("/{id}/comments")

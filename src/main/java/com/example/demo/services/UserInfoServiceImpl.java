@@ -1,10 +1,8 @@
 package com.example.demo.services;
 
 import com.example.demo.models.User;
-import com.example.demo.repositories.TaskRepository;
 import com.example.demo.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -30,10 +28,10 @@ public class UserInfoServiceImpl implements UserInfoService {
         return userRepository.findByEmail(email);
     }
 
-    @Override
+    /*@Override
     public UserDetailsService userDetailsService() {
         return null; //TODO
-    }
+    }*/
 
     @Override
     public Optional<User> getCurrentUser() {

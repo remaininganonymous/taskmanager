@@ -6,7 +6,6 @@ import com.example.demo.models.Comment;
 import com.example.demo.repositories.CommentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -45,6 +44,12 @@ public class CommentManagementServiceImpl implements CommentManagementService {
                 .orElseThrow(() -> new EntityNotFoundException("Комментарий с ID " + request.getCommentId() + " не найден"));
     }
 
+    /*
+
+    .commenter(userInfoService.getCurrentUser()
+                        .orElseThrow(() -> new AuthenticationCredentialsNotFoundException("Вы не авторизованы")))
+
+     */
     @Override
     public Comment create(LeaveCommentRequest request) {
         Comment comment = Comment.builder()
@@ -52,7 +57,7 @@ public class CommentManagementServiceImpl implements CommentManagementService {
                 .task(taskInfoService.getById(request.getTaskId())
                         .orElseThrow(() -> new EntityNotFoundException("Не найден пользователь с указанным ID")))
                 .commenter(userInfoService.getCurrentUser()
-                        .orElseThrow(() -> new AuthenticationCredentialsNotFoundException("Вы не авторизованы")))
+                        .orElseThrow())
                 .build();
         return commentRepository.save(comment);
     }
