@@ -1,7 +1,7 @@
 package com.example.demo.services;
 
-import com.example.demo.DTO.LeaveCommentRequest;
-import com.example.demo.DTO.UpdateCommentRequest;
+import com.example.demo.DTO.request.LeaveCommentRequest;
+import com.example.demo.DTO.request.UpdateCommentRequest;
 import com.example.demo.models.Comment;
 import java.util.UUID;
 

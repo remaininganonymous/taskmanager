@@ -1,12 +1,13 @@
 package com.example.demo.services;
 
-import com.example.demo.DTO.CreateUserRequest;
-import com.example.demo.DTO.UpdateUserRequest;
+import com.example.demo.DTO.request.SignUpRequest;
+import com.example.demo.DTO.request.UpdateUserRequest;
 import com.example.demo.models.User;
 import com.example.demo.repositories.UserRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -14,8 +15,15 @@ import java.util.UUID;
 @Service
 public class UserManagementServiceImpl implements UserManagementService {
 
-    @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
     public User update(UpdateUserRequest request) {
@@ -29,12 +37,12 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
-    public User create(CreateUserRequest request) {
+    public User create(SignUpRequest request) {
         User user = User.builder()
-                .email(request.getUserEmail())
-                .password(request.getUserPassword())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .build();
-        if (!userRepository.existsByEmail(request.getUserEmail())) {
+        if (!userRepository.existsByEmail(request.getEmail())) {
             return userRepository.save(user);
         } else {
             throw new EntityExistsException("Пользователь с таким email уже существует");

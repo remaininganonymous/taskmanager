@@ -1,7 +1,7 @@
 package com.example.demo.services;
 
-import com.example.demo.DTO.CreateTaskRequest;
-import com.example.demo.DTO.UpdateTaskRequest;
+import com.example.demo.DTO.request.CreateTaskRequest;
+import com.example.demo.DTO.request.UpdateTaskRequest;
 import com.example.demo.models.Task;
 
 import java.util.UUID;

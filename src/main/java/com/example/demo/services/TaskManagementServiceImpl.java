@@ -1,12 +1,13 @@
 package com.example.demo.services;
 
-import com.example.demo.DTO.CreateTaskRequest;
-import com.example.demo.DTO.UpdateTaskRequest;
+import com.example.demo.DTO.request.CreateTaskRequest;
+import com.example.demo.DTO.request.UpdateTaskRequest;
 import com.example.demo.models.Task;
 import com.example.demo.repositories.TaskRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -43,13 +44,6 @@ public class TaskManagementServiceImpl implements TaskManagementService {
                 .orElseThrow(() -> new EntityNotFoundException("Задача с ID " + request.getTaskId() + " не найдена"));
     }
 
-
-    /*
-
-    author(userInfoService.getCurrentUser()
-                        .orElseThrow(() -> new AuthenticationCredentialsNotFoundException("Вы не авторизованы")))
-
-     */
     @Override
     public Task create(CreateTaskRequest request) {
         Task task = Task.builder()
@@ -58,7 +52,7 @@ public class TaskManagementServiceImpl implements TaskManagementService {
                 .state(request.getTaskState())
                 .priority(request.getTaskPriority())
                 .author(userInfoService.getCurrentUser()
-                        .orElseThrow())
+                        .orElseThrow(() -> new AuthenticationCredentialsNotFoundException("Вы не авторизованы")))
                 .executor(userInfoService.getById(request.getTaskExecutorId())
                         .orElseThrow(() -> new EntityNotFoundException("Пользователь с ID " + request.getTaskExecutorId() + " не найден")))
                 .build();

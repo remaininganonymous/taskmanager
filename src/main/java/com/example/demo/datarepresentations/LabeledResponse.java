@@ -1,4 +1,4 @@
-package com.example.demo.datatypes;
+package com.example.demo.datarepresentations;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

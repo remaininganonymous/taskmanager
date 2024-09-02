@@ -15,7 +15,7 @@ public class Comment {
 
     @Getter
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private UUID id;
 
     @Getter

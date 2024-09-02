@@ -1,4 +1,4 @@
-package com.example.demo.DTO;
+package com.example.demo.DTO.request;
 
 import com.example.demo.models.enums.Priority;
 import com.example.demo.models.enums.State;

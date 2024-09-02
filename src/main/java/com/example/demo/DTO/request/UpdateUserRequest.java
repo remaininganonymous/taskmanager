@@ -1,15 +1,20 @@
-package com.example.demo.DTO;
+package com.example.demo.DTO.request;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.*;
+import jakarta.validation.constraints.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+
+import java.util.UUID;
 
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class CreateUserRequest {
+public class UpdateUserRequest {
+
+    @NotNull(message = "Необходимо указать ID изменяемого пользователя")
+    @Min(value = 1, message = "ID  не должен быть меньше 1")
+    private UUID userId;
 
     @NotNull(message = "Должен быть предоставлен email")
     @Email(message = "Должен быть введен корректный email-адрес в формате example@domain.com")

@@ -1,20 +1,21 @@
 package com.example.demo.controllers.v1;
 
-import com.example.demo.DTO.CreateTaskRequest;
-import com.example.demo.DTO.LeaveCommentRequest;
-import com.example.demo.DTO.UpdateTaskRequest;
-import com.example.demo.datatypes.LabeledResponse;
+import com.example.demo.DTO.request.CreateTaskRequest;
+import com.example.demo.DTO.request.LeaveCommentRequest;
+import com.example.demo.DTO.request.UpdateTaskRequest;
+import com.example.demo.datarepresentations.LabeledResponse;
 import com.example.demo.models.Comment;
 import com.example.demo.models.Task;
 import com.example.demo.models.enums.Priority;
 import com.example.demo.models.enums.State;
 import com.example.demo.services.*;
-import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -59,6 +60,7 @@ public class TaskController {
         this.commentManagementService = commentManagementService;
     }
 
+
     /*
     *  Обработка исключений
     * */
@@ -75,17 +77,11 @@ public class TaskController {
         return buildErrorResponse(e, status);
     }
 
-    @ExceptionHandler(EntityExistsException.class)
-    public ResponseEntity<?> handleEntityExistsException(EntityExistsException e) {
-        HttpStatus status = HttpStatus.CONFLICT;
-        return buildErrorResponse(e, status);
-    }
-
-    /*@ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
+    @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
     public ResponseEntity<?> handleAuthenticationCredentialsNotFoundException(AuthenticationCredentialsNotFoundException e) {
         HttpStatus status = HttpStatus.CONFLICT;
         return buildErrorResponse(e, status);
-    }*/
+    }
 
     /*
     * Маппинги
@@ -97,6 +93,7 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).body(new LabeledResponse("Созданная задача", task));
     }
 
+    @PreAuthorize("@userInfoService.isAuthor(#id, authentication.name)")
     @PatchMapping("/{id}/edit")
     public ResponseEntity<?> editTask(@PathVariable UUID id, @RequestBody @Valid UpdateTaskRequest request) {
         Task task = taskManagementService.update(request);
@@ -120,12 +117,14 @@ public class TaskController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{id}/delete")
+    @PreAuthorize("@userInfoService.isAuthor(#id, authentication.name)")
+    @DeleteMapping("/{id}/delete")
     public ResponseEntity<?> deleteTask(@PathVariable UUID id) {
         taskManagementService.delete(id);
         return ResponseEntity.ok().body("Удаление прошло успешно");
     }
 
+    @PreAuthorize("@userInfoService.isExecutor(#id, authentication.name)")
     @PatchMapping("/{id}/state")
     public ResponseEntity<?> changeState(@PathVariable UUID id, @RequestParam State state) {
         UpdateTaskRequest request = new UpdateTaskRequest();
@@ -135,6 +134,7 @@ public class TaskController {
         return ResponseEntity.ok(new LabeledResponse("Обновленная задача", updatedTask));
     }
 
+    @PreAuthorize("@userInfoService.isAuthor(#id, authentication.name)")
     @PatchMapping("/{id}/priority")
     public ResponseEntity<?> changePriority(@PathVariable UUID id, @RequestParam Priority priority) {
         UpdateTaskRequest request = new UpdateTaskRequest();
@@ -144,6 +144,7 @@ public class TaskController {
         return ResponseEntity.ok(new LabeledResponse("Обновленная задача", updatedTask));
     }
 
+    @PreAuthorize("@userInfoService.isAuthor(#id, authentication.name)")
     @PatchMapping("/{id}/assign")
     public ResponseEntity<?> assignExecutor(@PathVariable UUID taskId, @RequestParam UUID executorToAssignId) {
         UpdateTaskRequest request = new UpdateTaskRequest();
